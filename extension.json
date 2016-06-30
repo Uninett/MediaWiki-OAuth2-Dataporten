@@ -1,0 +1,40 @@
+{
+	"name": "OAuth2Dataporten",
+	"version": "0.0.1",
+	"author": [
+		"Kasper Rynning-Tønnesen"
+	],
+	"requires": {
+		"MediaWiki": ">= 1.26.0"
+	},
+	"url": "https://www.mediawiki.org/wiki/Extension:OAuth2Dataporten",
+	"descriptionmsg": "OAuth2 extension for MediaWiki to integrate Dataporten as a login strategy.",
+	"license-name": "MIT",
+	"type": "auth",
+	"AutoloadClasses": {
+		"OAuth2DataportenHooks": "OAuth2Dataporten.hooks.php",
+		"SpecialOAuth2Dataporten": "SpecialOAuth2Dataporten.php"
+	},
+	"Hooks": {
+		"UserLogout": [
+			"OAuth2DataportenHooks::onUserLogout"
+		],
+		"UserLoginForm": [
+			"OAuth2DataportenHooks::onUserLoginForm"
+		],
+		"BeforePageDisplay": [
+			"OAuth2DataportenHooks::onBeforePageDisplay"
+		],
+		"LoadExtensionSchemaUpdates": [
+			"OAuth2DataportenHooks::onLoadExtensionSchemaUpdates"
+		]
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "BoilerPlate"
+	},
+	"SpecialPages": {
+		"OAuth2Dataporten": "SpecialOAuth2Dataporten"
+	},
+	"manifest_version": 1
+}
