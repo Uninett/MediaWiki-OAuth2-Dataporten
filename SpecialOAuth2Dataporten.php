@@ -16,14 +16,14 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		parent::__construct('OAuth2Dataporten');
 		global $wgOAuth2Dataporten, $wgServer, $wgArticlePath;
 
-		$this->client = new OAuth2(
-			$wgOAuth2Dataporten['client']['id'],
-			$wgOAuth2Dataporten['client']['secret'],
-			$wgServer . str_replace( '$1', 'Special:OAuth2Dataporten/callback', $wgArticlePath),
-			$wgOAuth2Dataporten['config']['auth_endpoint'],
-			$wgOAuth2Dataporten['config']['token_endpoint'],
-			$wgOAuth2Dataporten['config']['info_endpoint'],
-			$wgOAuth2Dataporten['config']['auth_type']);
+		$this->client = new OAuth2([
+			"client_id" 		 => $wgOAuth2Dataporten['client']['id'],
+			"client_secret" 	 => $wgOAuth2Dataporten['client']['secret'],
+			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Dataporten/callback', $wgArticlePath),
+			"auth" 				 => $wgOAuth2Dataporten['config']['auth_endpoint'],
+			"token" 			 => $wgOAuth2Dataporten['config']['token_endpoint'],
+			//$wgOAuth2Dataporten['config']['info_endpoint'],
+			"authorization_type" => $wgOAuth2Dataporten['config']['auth_type']]);
 	}
 
 	public function execute( $parameter ) {
@@ -169,7 +169,9 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			throw new MWException('Unable to create user.');
 		}
 		$user->setRealName($name);
-		$user->setPassword(User::randomPassword());
+		if ( $wgAuth->allowPasswordChange() ) {
+			$user->setPassword(User::randomPassword());
+		}
 		if($email) {
 			$user->setEmail($email);
 			$user->setEmailAuthenticationTimestamp(time());
