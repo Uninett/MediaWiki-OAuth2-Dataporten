@@ -33,13 +33,30 @@ if(!defined('MEDIAWIKI')) {
 if ( function_exists( 'wfLoadExtension' ) ) {
 	wfLoadExtension( 'OAuth2Dataporten' );
 	// Keep i18n globals so mergeMessageFileList.php doesn't break
-	$wgOAuth2Dataporten['client']['id'] 			= getenv('DATAPORTEN_CLIENTID') ? getenv('DATAPORTEN_CLIENTID') : '75741f37-85fa-41a1-ae54-7f6f39b39f61';
-	$wgOAuth2Dataporten['client']['secret'] 		= getenv('DATAPORTEN_CLIENTSECRET') ? getenv('DATAPORTEN_CLIENTSECRET') : '2dfefed8-7445-46c3-a39a-c1f11acf39b9';
+	$wgOAuth2Dataporten['client']['id'] 			= getenv('DATAPORTEN_CLIENTID') ? getenv('DATAPORTEN_CLIENTID') : '';
+	$wgOAuth2Dataporten['client']['secret'] 		= getenv('DATAPORTEN_CLIENTSECRET') ? getenv('DATAPORTEN_CLIENTSECRET') : '';
+	$wgOAuth2Dataporten['config']['groups_array'] 	= getenv('DATAPORTEN_RIGHTS_ARRAY') ? json_decode(getenv('DATAPORTEN_RIGHTS_ARRAY'),true) : array();
 	$wgOAuth2Dataporten['config']['auth_endpoint']  = 'https://auth.dataporten.no/oauth/authorization';            // full url's
 	$wgOAuth2Dataporten['config']['token_endpoint'] = 'https://auth.dataporten.no/oauth/token';
 	$wgOAuth2Dataporten['config']['info_endpoint']  = 'https://auth.dataporten.no/userinfo';
 	$wgOAuth2Dataporten['config']['auth_type']      = 'Bearer';
+	$wgOAuth2Dataporten['config']['group_endpoint'] = 'https://groups-api.dataporten.no/groups/me/groups';
+	$wgGroupPermissions['group']['right'] 			= true /* or false */;
 	$wgGroupPermissions['oauth2'] 					= $wgGroupPermissions['user'];
+	# Disable for everyone.
+	$wgGroupPermissions['*']['edit']              	= false;
+	# Disable for users, too: by default 'user' is allowed to edit, even if '*' is not.
+	$wgGroupPermissions['user']['edit']           	= false;
+	# Make it so users with confirmed email addresses are in the group.
+	$wgAutopromote['emailconfirmed'] 				= APCOND_EMAILCONFIRMED;
+	# Hide group from user list. 
+	$wgImplicitGroups[] 							= 'emailconfirmed';
+	# Finally, set it to true for the desired group.
+	$wgGroupPermissions['emailconfirmed']['edit'] 	= true;
+
+	foreach($wgOAuth2Dataporten['config']['groups_array'] as $key => $value){
+		$wgGroupPermissions[$key] = $wgGroupPermissions[$value];
+	}
 
 	return;
 } else {

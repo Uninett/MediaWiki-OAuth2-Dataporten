@@ -87,9 +87,12 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		}
 
 		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['info_endpoint']));
+		$groups = $this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['group_endpoint']);
 
 		$user = $this->userHandling($credentials);
 		$user->setCookies();
+
+		$this->add_user_to_groups($user, $groups);
 
 		if($row['return_to']) {
 			$title = Title::newFromText($row['return_to']);
@@ -100,6 +103,15 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		$wgOut->redirect($title->getFullUrl());
 
 		return true;
+	}
+
+	private function add_user_to_groups($user, $groups) {
+		foreach($groups as $key => $value) {
+			$user->addGroup($groups[$key]["id"]);
+		}
+
+		print_r($user);
+		die();
 	}
 
 	private function fix_return($response) {
