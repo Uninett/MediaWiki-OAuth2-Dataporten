@@ -13,7 +13,8 @@
 	"type": "auth",
 	"AutoloadClasses": {
 		"OAuth2DataportenHooks": "OAuth2Dataporten.hooks.php",
-		"SpecialOAuth2Dataporten": "SpecialOAuth2Dataporten.php"
+		"SpecialOAuth2Dataporten": "SpecialOAuth2Dataporten.php",
+		"OAuth2": "submodules/OAuth2-Client/OAuth2.php"
 	},
 	"Hooks": {
 		"UserLogout": [

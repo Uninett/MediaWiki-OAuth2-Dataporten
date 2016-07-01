@@ -3,7 +3,7 @@ if ( !defined( 'MEDIAWIKI' )) {
 	die('This is a MediaWiki extension, and must be run from within MediaWiki.');
 }
 
-require_once('submodules/OAuth2-Client/OAuth2Client.php');
+//require_once('submodules/OAuth2-Client/OAuth2Client.php');
 
 class SpecialOAuth2Dataporten extends SpecialPage {
 
@@ -86,7 +86,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			throw new MWException('Something went wrong fetching the access token');
 		}
 
-		$credentials = $this->fix_return($this->client->get_identity($access_token));
+		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['info_endpoint']));
 
 		$user = $this->userHandling($credentials);
 		$user->setCookies();
