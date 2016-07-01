@@ -109,9 +109,6 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		foreach($groups as $key => $value) {
 			$user->addGroup($groups[$key]["id"]);
 		}
-
-		print_r($user);
-		die();
 	}
 
 	private function fix_return($response) {
