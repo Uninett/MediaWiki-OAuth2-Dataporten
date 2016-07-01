@@ -1,3 +1,0 @@
-[submodule "OAuth2-Client"]
-	path = OAuth2-Client
-	url = git@github.com:kasperrt/OAuth2-Client.git
