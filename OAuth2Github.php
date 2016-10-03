@@ -41,6 +41,7 @@ if ( function_exists( 'wfLoadExtension' ) ) {
 	$wgOAuth2Github['config']['token_endpoint'] = 'https://github.com/login/oauth/access_token';
 	$wgOAuth2Github['config']['info_endpoint']  = 'https://api.github.com/user';
 	$wgOAuth2Github['config']['auth_type']      = 'token';
+	$wgOAuth2Github['config']['required_org']   = NULL;
 	$wgGroupPermissions['group']['right'] 			= true /* or false */;
 	$wgGroupPermissions['oauth2'] 					= $wgGroupPermissions['user'];
 	# Disable for everyone.

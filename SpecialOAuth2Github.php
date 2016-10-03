@@ -91,16 +91,19 @@ class SpecialOAuth2Github extends SpecialPage {
 		$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs'
 		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Github['config']['group_endpoint']);
 
-        $requiredOrg = 'LosFuzzys';
-        if(!$this->checkGroupmembership($orgs, $requiredOrg)) {
-                $error = ('You a not part of the ' . $requiredOrg . ' organization on Github!');
 
-                global $wgOut;
-                $wgOut->setPageTitle('Auth Error');
-                $wgOut->addHTML('<strong>' . $error . '</strong>');
 
-                return false;
-        }
+ 		if(isset($wgOAuth2Github['config']['required_org']) && $wgOAuth2Github['config']['required_org'] != NULL) {
+	        if(!$this->checkGroupmembership($orgs, $wgOAuth2Github['config']['required_org'])) {
+	                $error = ('You a not part of the ' . $wgOAuth2Github['config']['info_endpoint'] . ' organization on Github!');
+
+	                global $wgOut;
+	                $wgOut->setPageTitle('Auth Error');
+	                $wgOut->addHTML('<strong>' . $error . '</strong>');
+
+	                return false;
+	        }
+	    }
 
 
 		$user = $this->userHandling($credentials);
@@ -223,6 +226,7 @@ class SpecialOAuth2Github extends SpecialPage {
 			$wgOAuth2Github['config']['auth_endpoint'],
 			$wgOAuth2Github['config']['token_endpoint'],
 			//$wgOAuth2Github['config']['info_endpoint'],
+			//$wgOAuth2Github['config']['required_org']
 			$wgOAuth2Github['config']['auth_type']
 		);
 	}

@@ -14,6 +14,7 @@ Required settings in global $wgOAuth2Github (in your `LocalSettings.php`)
 
 Optional settings in global $wgOAuth2Github (in your `LocalSettings.php`) 
 
+    $wgOAuth2Github['config']['required_org']   = 'LosFuzzys';
     $wgOAuth2Github['config']['auth_endpoint']  = 'https://github.com/login/oauth/authorize';            // full url's
     $wgOAuth2Github['config']['token_endpoint'] = 'https://github.com/login/oauth/access_token';
     $wgOAuth2Github['config']['info_endpoint']  = 'https://api.github.com/user';
