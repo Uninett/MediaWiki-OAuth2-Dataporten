@@ -95,7 +95,7 @@ class SpecialOAuth2Github extends SpecialPage {
 
  		if(isset($wgOAuth2Github['config']['required_org']) && $wgOAuth2Github['config']['required_org'] != NULL) {
 	        if(!$this->checkGroupmembership($orgs, $wgOAuth2Github['config']['required_org'])) {
-	                $error = ('You a not part of the ' . $wgOAuth2Github['config']['info_endpoint'] . ' organization on Github!');
+	                $error = ('You a not part of the ' . $wgOAuth2Github['config']['required_org'] . ' organization on Github!');
 
 	                global $wgOut;
 	                $wgOut->setPageTitle('Auth Error');
