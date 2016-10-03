@@ -8,7 +8,7 @@ if ( !defined( 'MEDIAWIKI' )) {
 class SpecialOAuth2Dataporten extends SpecialPage {
 
 	private $client;
-	private $table = 'dataporten_users';
+	private $table = 'github_users';
 
 	public function __construct() {
 		if( !self::OAuthEnabled() ) return;
@@ -52,9 +52,9 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 
 		$state = uniqid('', true);
 		$url   = $wgRequest->getVal('returnto');
-		
+
 		$dbw = wfGetDB(DB_MASTER);
-		$dbw->insert( 'dataporten_states', 
+		$dbw->insert( 'github_states',
 			array( 'state' => $state,
 				   'return_to' => $url ),
 				   'Database::insert' );
@@ -67,7 +67,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 
 		$dbr = wfGetDB(DB_SLAVE);
 		$row = $dbr->selectRow(
-			'dataporten_states',
+			'github_states',
 			'*',
 			array('state' => $wgRequest->getVal('state')));
 
@@ -77,7 +77,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		}
 
 		$dbw = wfGetDB(DB_MASTER);
-		$dbw->delete('dataporten_states',
+		$dbw->delete('github_states',
 					 array('state' => $wgRequest->getVal('state')));
 		$dbw->begin();
 
@@ -87,12 +87,27 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		}
 
 		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['info_endpoint']));
-		$groups = $this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['group_endpoint']);
+
+		// https://api.github.com/users/$name/orgs
+		$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs'
+		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Dataporten['config']['group_endpoint']);
+
+        $requiredOrg = 'LosFuzzys';
+        if(!$this->checkGroupmembership($orgs, $requiredOrg)) {
+                $error = ('You a not part of the ' . $requiredOrg . ' organization on Github!');
+
+                global $wgOut;
+                $wgOut->setPageTitle('Auth Error');
+                $wgOut->addHTML('<strong>' . $error . '</strong>');
+
+                return false;
+        }
+
 
 		$user = $this->userHandling($credentials);
 		$user->setCookies();
 
-		$this->add_user_to_groups($user, $groups);
+		//$this->add_user_to_groups($user, $2);
 
 		if($row['return_to']) {
 			$title = Title::newFromText($row['return_to']);
@@ -103,6 +118,15 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		$wgOut->redirect($title->getFullUrl());
 
 		return true;
+	}
+
+	private function checkGroupmembership($orgs, $requiredOrg) {
+		foreach($orgs as $org) {
+			// if($org['id'] === 15344454) return true;
+			if($org['login'] === $requiredOrg) return true;
+		}
+
+		return false;
 	}
 
 	private function add_user_to_groups($user, $groups) {
@@ -138,7 +162,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		}
 
 		$oauth_identity = array(
-			'id' 	   => $id,
+			'id' 	   => $response['login'],
 			'email'    => $email,
 			'name'     => $name,
 		);
@@ -160,7 +184,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		global $wgOAuth2Dataporten, $wgAuth;
 
 		$name 		= $credentials['name'];
-		$id 		= $credentials["id"]; 
+		$id 		= $credentials["id"];
 		$email 		= $credentials["email"];
 		$externalId = $id;
 		$dbr 		= wfGetDB(DB_SLAVE);
