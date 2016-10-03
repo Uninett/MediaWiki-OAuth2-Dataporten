@@ -5,7 +5,7 @@ if ( !defined( 'MEDIAWIKI' )) {
 
 //require_once('submodules/OAuth2-Client/OAuth2Client.php');
 
-class SpecialOAuth2Dataporten extends SpecialPage {
+class SpecialOAuth2Github extends SpecialPage {
 
 	private $client;
 	private $table = 'github_users';
@@ -13,17 +13,16 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	public function __construct() {
 		if( !self::OAuthEnabled() ) return;
 
-		parent::__construct('OAuth2Dataporten');
-		global $wgOAuth2Dataporten, $wgServer, $wgArticlePath;
+		parent::__construct('OAuth2Github');
+		global $wgOAuth2Github, $wgServer, $wgArticlePath;
 
 		$this->client = new OAuth2([
-			"client_id" 		 => $wgOAuth2Dataporten['client']['id'],
-			"client_secret" 	 => $wgOAuth2Dataporten['client']['secret'],
-			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Dataporten/callback', $wgArticlePath),
-			"auth" 				 => $wgOAuth2Dataporten['config']['auth_endpoint'],
-			"token" 			 => $wgOAuth2Dataporten['config']['token_endpoint'],
-			//$wgOAuth2Dataporten['config']['info_endpoint'],
-			"authorization_type" => $wgOAuth2Dataporten['config']['auth_type']]);
+			"client_id" 		 => $wgOAuth2Github['client']['id'],
+			"client_secret" 	 => $wgOAuth2Github['client']['secret'],
+			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Github/callback', $wgArticlePath),
+			"auth" 				 => $wgOAuth2Github['config']['auth_endpoint'],
+			"token" 			 => $wgOAuth2Github['config']['token_endpoint'],
+			"authorization_type" => $wgOAuth2Github['config']['auth_type']]);
 	}
 
 	public function execute( $parameter ) {
@@ -42,7 +41,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	private function _logout() {
-		global $wgOAuth2Dataporten, $wgOut, $wgUser;
+		global $wgOAuth2Github, $wgOut, $wgUser;
 		if( $wgUser->isLoggedIn() ) $wgUser->logout();
 
 	}
@@ -63,7 +62,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	private function _callback() {
-		global $wgOAuth2Dataporten, $wgOut, $wgRequest;
+		global $wgOAuth2Github, $wgOut, $wgRequest;
 
 		$dbr = wfGetDB(DB_SLAVE);
 		$row = $dbr->selectRow(
@@ -86,11 +85,11 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			throw new MWException('Something went wrong fetching the access token');
 		}
 
-		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['info_endpoint']));
+		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Github['config']['info_endpoint']));
 
 		// https://api.github.com/users/$name/orgs
 		$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs'
-		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Dataporten['config']['group_endpoint']);
+		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Github['config']['group_endpoint']);
 
         $requiredOrg = 'LosFuzzys';
         if(!$this->checkGroupmembership($orgs, $requiredOrg)) {
@@ -171,17 +170,13 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	private function _default() {
-		global $wgOAuth2Dataporten, $wgOut, $wgUser, $wgExtensionAssetsPath;
-		/*
-		$wg->setPagetitle(wfMsg('dataporten-login-header', 'Dataporten'));
-		/*if(!$wgUser->isLoggedIn()) {
-			$wgOut->addWikiMsg('dataporten-you-can-login-to-this-wiki')
-		}*/
+		global $wgOAuth2Github, $wgOut, $wgUser, $wgExtensionAssetsPath;
+
 		return true;
 	}
 
 	private function userHandling($credentials) {
-		global $wgOAuth2Dataporten, $wgAuth;
+		global $wgOAuth2Github, $wgAuth;
 
 		$name 		= $credentials['name'];
 		$id 		= $credentials["id"];
@@ -194,7 +189,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			array('external_id' => $externalId)
 		);
 
-		if($row) { 				//Dataporten-user already exists
+		if($row) { 				//Github-user already exists
 			return User::newFromId($row->internal_id);
 		}
 		$user = User::newFromName($id, 'creatable');
@@ -221,14 +216,14 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	public static function OAuthEnabled() {
-		global $wgOAuth2Dataporten;
+		global $wgOAuth2Github;
 		return isset(
-			$wgOAuth2Dataporten['client']['id'],
-			$wgOAuth2Dataporten['client']['secret'],
-			$wgOAuth2Dataporten['config']['auth_endpoint'],
-			$wgOAuth2Dataporten['config']['token_endpoint'],
-			$wgOAuth2Dataporten['config']['info_endpoint'],
-			$wgOAuth2Dataporten['config']['auth_type']
+			$wgOAuth2Github['client']['id'],
+			$wgOAuth2Github['client']['secret'],
+			$wgOAuth2Github['config']['auth_endpoint'],
+			$wgOAuth2Github['config']['token_endpoint'],
+			//$wgOAuth2Github['config']['info_endpoint'],
+			$wgOAuth2Github['config']['auth_type']
 		);
 	}
 

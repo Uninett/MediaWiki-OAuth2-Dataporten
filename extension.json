@@ -1,33 +1,33 @@
 {
-	"name": "OAuth2Dataporten",
-	"version": "0.0.1",
+	"name": "OAuth2Github",
+	"version": "0.0.2",
 	"author": [
-		"Kasper Rynning-Tønnesen"
+		"Stefan2904 & Kasper Rynning-Tønnesen"
 	],
 	"requires": {
 		"MediaWiki": ">= 1.26.0"
 	},
-	"url": "https://www.mediawiki.org/wiki/Extension:OAuth2Dataporten",
-	"descriptionmsg": "OAuth2 extension for MediaWiki to integrate Dataporten as a login strategy.",
+	"url": "https://www.mediawiki.org/wiki/Extension:OAuth2Github",
+	"descriptionmsg": "OAuth2 extension for MediaWiki to integrate Github as an identity provider.",
 	"license-name": "MIT",
 	"type": "auth",
 	"AutoloadClasses": {
-		"OAuth2DataportenHooks": "OAuth2Dataporten.hooks.php",
-		"SpecialOAuth2Dataporten": "SpecialOAuth2Dataporten.php",
+		"OAuth2GithubHooks": "OAuth2Github.hooks.php",
+		"SpecialOAuth2Github": "SpecialOAuth2Github.php",
 		"OAuth2":"submodules/OAuth2-Client/OAuth2Client.php"
 	},
 	"Hooks": {
 		"UserLogout": [
-			"OAuth2DataportenHooks::onUserLogout"
+			"OAuth2GithubHooks::onUserLogout"
 		],
 		"UserLoginForm": [
-			"OAuth2DataportenHooks::onUserLoginForm"
+			"OAuth2GithubHooks::onUserLoginForm"
 		],
 		"BeforePageDisplay": [
-			"OAuth2DataportenHooks::onBeforePageDisplay"
+			"OAuth2GithubHooks::onBeforePageDisplay"
 		],
 		"LoadExtensionSchemaUpdates": [
-			"OAuth2DataportenHooks::onLoadExtensionSchemaUpdates"
+			"OAuth2GithubHooks::onLoadExtensionSchemaUpdates"
 		]
 	},
 	"ResourceFileModulePaths": {
@@ -35,7 +35,7 @@
 		"remoteExtPath": "BoilerPlate"
 	},
 	"SpecialPages": {
-		"OAuth2Dataporten": "SpecialOAuth2Dataporten"
+		"OAuth2Github": "SpecialOAuth2Github"
 	},
 	"manifest_version": 1
 }

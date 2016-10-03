@@ -1,5 +1,5 @@
 --
--- extension Dataporten state SQL schema
+-- extension Github-Oauth2 state SQL schema
 --
 CREATE TABLE /*_*/`github_states` (
   `state` VARCHAR(255) NOT NULL,
