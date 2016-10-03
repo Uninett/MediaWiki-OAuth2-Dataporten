@@ -88,7 +88,7 @@ class SpecialOAuth2Github extends SpecialPage {
 		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Github['config']['info_endpoint']));
 
 		// https://api.github.com/users/$name/orgs
-		$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs'
+		$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs';
 		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Github['config']['group_endpoint']);
 
 
