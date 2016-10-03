@@ -3,7 +3,7 @@ if ( !defined( 'MEDIAWIKI' )) {
 	die('This is a MediaWiki extension, and must be run from within MediaWiki.');
 }
 
-//require_once('submodules/OAuth2-Client/OAuth2Client.php');
+//require_once('OAuth2-Client/OAuth2Client.php');
 
 class SpecialOAuth2Github extends SpecialPage {
 

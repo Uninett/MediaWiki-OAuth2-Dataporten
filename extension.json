@@ -14,7 +14,7 @@
 	"AutoloadClasses": {
 		"OAuth2GithubHooks": "OAuth2Github.hooks.php",
 		"SpecialOAuth2Github": "SpecialOAuth2Github.php",
-		"OAuth2":"submodules/OAuth2-Client/OAuth2Client.php"
+		"OAuth2":"OAuth2-Client/OAuth2Client.php"
 	},
 	"Hooks": {
 		"UserLogout": [
