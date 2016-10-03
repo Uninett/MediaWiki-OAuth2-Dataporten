@@ -1,4 +1,4 @@
-<?php 
+<?php
 class OAuth2DataportenHooks {
 
 	public static function onBeforePageDisplay( OutputPage &$out, Skin &$skin ) {
@@ -26,9 +26,9 @@ class OAuth2DataportenHooks {
 	}
 
 	public static function onLoadExtensionSchemaUpdates( DatabaseUpdater $updater ) {
-		$updater->addExtensionTable( 'dataporten_states',
+		$updater->addExtensionTable( 'github_states',
 			__DIR__ . '/sql/state.sql' );
-		$updater->addExtensionTable( 'dataporten_users',
+		$updater->addExtensionTable( 'github_users',
 			__DIR__ . '/sql/users.sql' );
 		$updater->doUpdates();
 		return true;
