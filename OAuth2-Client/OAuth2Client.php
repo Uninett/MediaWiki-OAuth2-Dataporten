@@ -63,8 +63,8 @@ class OAuth2 {
 		$result 	  = curl_exec($this->create_curl($url, array('Accept: application/json'), $params));
 		$result_obj   = json_decode($result, true);
 		$access_token = $result_obj['access_token'];
-		$expires_in   = $result_obj['expires_in'];
-		$expires_at   = time() + $expires_in;
+		//$expires_in   = $result_obj['expires_in'];
+		//$expires_at   = time() + $expires_in;
 
 		return $access_token;
 	}

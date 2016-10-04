@@ -17,13 +17,13 @@ class SpecialOAuth2Github extends SpecialPage {
 		global $wgOAuth2Github, $wgServer, $wgArticlePath;
 
 		$this->client = new OAuth2([
-            "client_id" 		 => $wgOAuth2Github['client']['id'],
+			"client_id" 		 => $wgOAuth2Github['client']['id'],
 			"client_secret" 	 => $wgOAuth2Github['client']['secret'],
 			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Github/callback', $wgArticlePath),
 			"auth" 				 => $wgOAuth2Github['config']['auth_endpoint'],
 			"token" 			 => $wgOAuth2Github['config']['token_endpoint'],
 			"authorization_type" => $wgOAuth2Github['config']['auth_type'],
-            "scope" 			 => "read:org"]);
+			"scope" 			 => "user:email, read:org"]);
 	}
 
 	public function execute( $parameter ) {
@@ -144,6 +144,8 @@ class SpecialOAuth2Github extends SpecialPage {
 			$name = $response['name'];
 		} else if(isset($response['user']['name'])) {
 			$name = $response['user']['name'];
+		} else {
+			$name = null;
 		}
 
 		if(isset($response['id'])) {
@@ -162,6 +164,8 @@ class SpecialOAuth2Github extends SpecialPage {
 			$email = $response['email'];
 		} else if(isset($response['user']['email'])) {
 			$email = $response['user']['email'];
+		} else {
+			$email = null;
 		}
 
 		$oauth_identity = array(
@@ -200,7 +204,9 @@ class SpecialOAuth2Github extends SpecialPage {
 		if( false === $user || $user->getId() != 0) {
 			throw new MWException('Unable to create user.');
 		}
-		$user->setRealName($name);
+		if ($name) {
+			$user->setRealName($name);
+		}
 		if ( $wgAuth->allowPasswordChange() ) {
 			$user->setPassword(User::randomPassword());
 		}
