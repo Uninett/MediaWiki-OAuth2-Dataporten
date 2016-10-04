@@ -17,12 +17,13 @@ class SpecialOAuth2Github extends SpecialPage {
 		global $wgOAuth2Github, $wgServer, $wgArticlePath;
 
 		$this->client = new OAuth2([
-			"client_id" 		 => $wgOAuth2Github['client']['id'],
+            "client_id" 		 => $wgOAuth2Github['client']['id'],
 			"client_secret" 	 => $wgOAuth2Github['client']['secret'],
 			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Github/callback', $wgArticlePath),
 			"auth" 				 => $wgOAuth2Github['config']['auth_endpoint'],
 			"token" 			 => $wgOAuth2Github['config']['token_endpoint'],
-			"authorization_type" => $wgOAuth2Github['config']['auth_type']]);
+			"authorization_type" => $wgOAuth2Github['config']['auth_type'],
+            "scope" 			 => "read:org"]);
 	}
 
 	public function execute( $parameter ) {
@@ -88,9 +89,9 @@ class SpecialOAuth2Github extends SpecialPage {
 		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Github['config']['info_endpoint']));
 
 		// https://api.github.com/users/$name/orgs
-		$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs';
+		//$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs';
+		$orgsEndpoint = 'https://api.github.com/user/orgs';
 		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Github['config']['group_endpoint']);
-
 
 
  		if(isset($wgOAuth2Github['config']['required_org']) && $wgOAuth2Github['config']['required_org'] != NULL) {
