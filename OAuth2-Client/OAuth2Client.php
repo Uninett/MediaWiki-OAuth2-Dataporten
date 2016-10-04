@@ -33,6 +33,7 @@ class OAuth2 {
 		$this->verify_ssl_host = $this->verify_ssl_peer === 1 ? 2 : 0;
 		$this->grant_type 	   = isset($params["grant_type"]) ? $params["grant_type"] : "authorization_code";
 		$this->response_type   = isset($params["response_type"]) ? $params["response_type"] : "code";
+		$this->scope 		   = isset($params["scope"]) ? $params["scope"] : "";
 	}
 
 	public function get_access_token($state = false) {
@@ -86,6 +87,7 @@ class OAuth2 {
 			'client_id' 	=> $this->client_id,
 			'response_type' => $this->response_type,
 			'redirect_uri'  => $this->redirect_uri,
+            'scope' 		=> $this->scope,
 			'state' 		=> $state,
 		);
 
