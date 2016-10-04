@@ -208,7 +208,7 @@ class SpecialOAuth2Github extends SpecialPage {
 			$user->setRealName($name);
 		}
 		if ( $wgAuth->allowPasswordChange() ) {
-			$user->setPassword(User::randomPassword());
+			$user->setPassword(PasswordFactory::generateRandomPasswordString(128));
 		}
 		if($email) {
 			$user->setEmail($email);
