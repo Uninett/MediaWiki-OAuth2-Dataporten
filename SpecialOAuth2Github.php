@@ -108,7 +108,7 @@ class SpecialOAuth2Github extends SpecialPage {
 
 
 		$user = $this->userHandling($credentials);
-		$user->setCookies();
+		$user->setCookies(null, null, true);
 
 		//$this->add_user_to_groups($user, $2);
 
