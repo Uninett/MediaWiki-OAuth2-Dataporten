@@ -1,7 +1,7 @@
 --
--- extension Dataporten users SQL schema
+-- extension Github-Oauth2 users SQL schema
 --
-CREATE TABLE /*_*/`dataporten_users` (
+CREATE TABLE /*_*/`github_users` (
   `external_id` VARCHAR(255) NOT NULL,
   `internal_id` INT(10) NOT NULL,
   PRIMARY KEY (`external_id`),

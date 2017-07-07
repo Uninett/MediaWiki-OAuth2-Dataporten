@@ -3,27 +3,27 @@ if ( !defined( 'MEDIAWIKI' )) {
 	die('This is a MediaWiki extension, and must be run from within MediaWiki.');
 }
 
-//require_once('submodules/OAuth2-Client/OAuth2Client.php');
+//require_once('OAuth2-Client/OAuth2Client.php');
 
-class SpecialOAuth2Dataporten extends SpecialPage {
+class SpecialOAuth2Github extends SpecialPage {
 
 	private $client;
-	private $table = 'dataporten_users';
+	private $table = 'github_users';
 
 	public function __construct() {
 		if( !self::OAuthEnabled() ) return;
 
-		parent::__construct('OAuth2Dataporten');
-		global $wgOAuth2Dataporten, $wgServer, $wgArticlePath;
+		parent::__construct('OAuth2Github');
+		global $wgOAuth2Github, $wgServer, $wgArticlePath;
 
 		$this->client = new OAuth2([
-			"client_id" 		 => $wgOAuth2Dataporten['client']['id'],
-			"client_secret" 	 => $wgOAuth2Dataporten['client']['secret'],
-			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Dataporten/callback', $wgArticlePath),
-			"auth" 				 => $wgOAuth2Dataporten['config']['auth_endpoint'],
-			"token" 			 => $wgOAuth2Dataporten['config']['token_endpoint'],
-			//$wgOAuth2Dataporten['config']['info_endpoint'],
-			"authorization_type" => $wgOAuth2Dataporten['config']['auth_type']]);
+			"client_id" 		 => $wgOAuth2Github['client']['id'],
+			"client_secret" 	 => $wgOAuth2Github['client']['secret'],
+			"redirect_uri" 		 => $wgServer . str_replace( '$1', 'Special:OAuth2Github/callback', $wgArticlePath),
+			"auth" 				 => $wgOAuth2Github['config']['auth_endpoint'],
+			"token" 			 => $wgOAuth2Github['config']['token_endpoint'],
+			"authorization_type" => $wgOAuth2Github['config']['auth_type'],
+			"scope" 			 => "user:email, read:org"]);
 	}
 
 	public function execute( $parameter ) {
@@ -42,7 +42,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	private function _logout() {
-		global $wgOAuth2Dataporten, $wgOut, $wgUser;
+		global $wgOAuth2Github, $wgOut, $wgUser;
 		if( $wgUser->isLoggedIn() ) $wgUser->logout();
 
 	}
@@ -52,9 +52,9 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 
 		$state = uniqid('', true);
 		$url   = $wgRequest->getVal('returnto');
-		
+
 		$dbw = wfGetDB(DB_MASTER);
-		$dbw->insert( 'dataporten_states', 
+		$dbw->insert( 'github_states',
 			array( 'state' => $state,
 				   'return_to' => $url ),
 				   'Database::insert' );
@@ -63,11 +63,11 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	private function _callback() {
-		global $wgOAuth2Dataporten, $wgOut, $wgRequest;
+		global $wgOAuth2Github, $wgOut, $wgRequest;
 
 		$dbr = wfGetDB(DB_SLAVE);
 		$row = $dbr->selectRow(
-			'dataporten_states',
+			'github_states',
 			'*',
 			array('state' => $wgRequest->getVal('state')));
 
@@ -77,7 +77,7 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		}
 
 		$dbw = wfGetDB(DB_MASTER);
-		$dbw->delete('dataporten_states',
+		$dbw->delete('github_states',
 					 array('state' => $wgRequest->getVal('state')));
 		$dbw->begin();
 
@@ -86,13 +86,31 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			throw new MWException('Something went wrong fetching the access token');
 		}
 
-		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['info_endpoint']));
-		$groups = $this->client->get_identity($access_token, $wgOAuth2Dataporten['config']['group_endpoint']);
+		$credentials = $this->fix_return($this->client->get_identity($access_token, $wgOAuth2Github['config']['info_endpoint']));
+
+		// https://api.github.com/users/$name/orgs
+		//$orgsEndpoint = 'https://api.github.com/users/' .$credentials['id'] . '/orgs';
+		$orgsEndpoint = 'https://api.github.com/user/orgs';
+		$orgs = $this->client->get_identity($access_token, $orgsEndpoint); // $wgOAuth2Github['config']['group_endpoint']);
+
+
+ 		if(isset($wgOAuth2Github['config']['required_org']) && $wgOAuth2Github['config']['required_org'] != NULL) {
+	        if(!$this->checkGroupmembership($orgs, $wgOAuth2Github['config']['required_org'])) {
+	                $error = ('You a not part of the ' . $wgOAuth2Github['config']['required_org'] . ' organization on Github!');
+
+	                global $wgOut;
+	                $wgOut->setPageTitle('Auth Error');
+	                $wgOut->addHTML('<strong>' . $error . '</strong>');
+
+	                return false;
+	        }
+	    }
+
 
 		$user = $this->userHandling($credentials);
-		$user->setCookies();
+		$user->setCookies(null, null, true);
 
-		$this->add_user_to_groups($user, $groups);
+		//$this->add_user_to_groups($user, $2);
 
 		if($row['return_to']) {
 			$title = Title::newFromText($row['return_to']);
@@ -103,6 +121,15 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 		$wgOut->redirect($title->getFullUrl());
 
 		return true;
+	}
+
+	private function checkGroupmembership($orgs, $requiredOrg) {
+		foreach($orgs as $org) {
+			// if($org['id'] === 15344454) return true;
+			if($org['login'] === $requiredOrg) return true;
+		}
+
+		return false;
 	}
 
 	private function add_user_to_groups($user, $groups) {
@@ -117,6 +144,8 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			$name = $response['name'];
 		} else if(isset($response['user']['name'])) {
 			$name = $response['user']['name'];
+		} else {
+			$name = null;
 		}
 
 		if(isset($response['id'])) {
@@ -135,10 +164,12 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			$email = $response['email'];
 		} else if(isset($response['user']['email'])) {
 			$email = $response['user']['email'];
+		} else {
+			$email = null;
 		}
 
 		$oauth_identity = array(
-			'id' 	   => $id,
+			'id' 	   => $response['login'],
 			'email'    => $email,
 			'name'     => $name,
 		);
@@ -147,20 +178,16 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	private function _default() {
-		global $wgOAuth2Dataporten, $wgOut, $wgUser, $wgExtensionAssetsPath;
-		/*
-		$wg->setPagetitle(wfMsg('dataporten-login-header', 'Dataporten'));
-		/*if(!$wgUser->isLoggedIn()) {
-			$wgOut->addWikiMsg('dataporten-you-can-login-to-this-wiki')
-		}*/
+		global $wgOAuth2Github, $wgOut, $wgUser, $wgExtensionAssetsPath;
+
 		return true;
 	}
 
 	private function userHandling($credentials) {
-		global $wgOAuth2Dataporten, $wgAuth;
+		global $wgOAuth2Github, $wgAuth;
 
 		$name 		= $credentials['name'];
-		$id 		= $credentials["id"]; 
+		$id 		= $credentials["id"];
 		$email 		= $credentials["email"];
 		$externalId = $id;
 		$dbr 		= wfGetDB(DB_SLAVE);
@@ -170,16 +197,26 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 			array('external_id' => $externalId)
 		);
 
-		if($row) { 				//Dataporten-user already exists
+		if($row) { 				//Github-user already exists
 			return User::newFromId($row->internal_id);
 		}
 		$user = User::newFromName($id, 'creatable');
 		if( false === $user || $user->getId() != 0) {
 			throw new MWException('Unable to create user.');
 		}
-		$user->setRealName($name);
+		if ( !$user->isLoggedIn() ) { 
+			// [New in MW 1.27] 
+			// User does not exist, 
+			// so we need to add them to the DB before changing fields.
+			$user->addToDatabase(); 
+		}
+
+		if ($name) {
+			$user->setRealName($name);
+		}
 		if ( $wgAuth->allowPasswordChange() ) {
-			$user->setPassword(User::randomPassword());
+			// TODO: This is deprecated since MW 1.27, replace by AuthManager
+			$user->setPassword(PasswordFactory::generateRandomPasswordString(128));
 		}
 		if($email) {
 			$user->setEmail($email);
@@ -197,14 +234,15 @@ class SpecialOAuth2Dataporten extends SpecialPage {
 	}
 
 	public static function OAuthEnabled() {
-		global $wgOAuth2Dataporten;
+		global $wgOAuth2Github;
 		return isset(
-			$wgOAuth2Dataporten['client']['id'],
-			$wgOAuth2Dataporten['client']['secret'],
-			$wgOAuth2Dataporten['config']['auth_endpoint'],
-			$wgOAuth2Dataporten['config']['token_endpoint'],
-			$wgOAuth2Dataporten['config']['info_endpoint'],
-			$wgOAuth2Dataporten['config']['auth_type']
+			$wgOAuth2Github['client']['id'],
+			$wgOAuth2Github['client']['secret'],
+			$wgOAuth2Github['config']['auth_endpoint'],
+			$wgOAuth2Github['config']['token_endpoint'],
+			//$wgOAuth2Github['config']['info_endpoint'],
+			//$wgOAuth2Github['config']['required_org']
+			$wgOAuth2Github['config']['auth_type']
 		);
 	}
 

@@ -1,26 +1,54 @@
-MediaWiki-OAuth2-Dataporten
+MediaWiki-OAuth2-Github
 ==========================
 
-MediaWiki OAuth2 Dataporten Extension
+**MediaWiki OAuth2 Github Extension**
+
+OAuth2 extension for MediaWiki to integrate Github as an identity provider.
 
 MediaWiki implementation of the [OAuth2 Client library](https://github.com/kasperrt/OAuth2-Client).
 
-Required settings in global $wgOAuth2Dataporten
 
-    $wgOAuth2Dataporten['client']['id']             = '';
-    $wgOAuth2Dataporten['client']['secret']         = '';
-    $wgOAuth2Dataporten['config']['auth_endpoint']  = 'https://auth.dataporten.no/oauth/authorization'; 
-    $wgOAuth2Dataporten['config']['token_endpoint'] = 'https://auth.dataporten.no/oauth/token';
-    $wgOAuth2Dataporten['config']['info_endpoint']  = 'https://auth.dataporten.no/userinfo';
-    $wgOAuth2Dataporten['config']['auth_type']      = 'Bearer';
+### Configuration
 
-All settings should be changed.
+You can load the plugin by putting the following line into your `LocalSettings.php`:
+
+```php
+wfLoadExtension( 'MediaWiki-OAuth2-Github' );
+```
+
+Required settings in global $wgOAuth2Github (in your `LocalSettings.php`): 
+
+```php
+$wgOAuth2Github['client']['id']             = '';
+$wgOAuth2Github['client']['secret']         = '';
+```
+
+Optional settings in global $wgOAuth2Github (in your `LocalSettings.php`) 
+
+```php
+$wgOAuth2Github['config']['required_org']   = 'LosFuzzys';
+$wgOAuth2Github['config']['auth_endpoint']  = 'https://github.com/login/oauth/authorize'; 
+$wgOAuth2Github['config']['token_endpoint'] = 'https://github.com/login/oauth/access_token';
+$wgOAuth2Github['config']['info_endpoint']  = 'https://api.github.com/user';
+$wgOAuth2Github['config']['auth_type']      = 'token';
+```
 
 The callback url back to your wiki would be:
 
-    http://your.wiki.domain/path/to/wiki/Special:OAuth2Dataporten/callback
+    http://your.wiki.domain/path/to/wiki/Special:OAuth2Github/callback
 
-License
--------
+
+### Closed wiki?
+
+ If your Wiki is completely closed (login required for every page), you need to whitelist the plugin's hook:
+
+```php
+// whitelist oauth hooks for non-authed users:
+$wgWhitelistRead = array('Special:OAuth2Github');
+```
+
+
+### License
+
 MIT
 

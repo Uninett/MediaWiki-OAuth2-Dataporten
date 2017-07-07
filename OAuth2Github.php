@@ -2,7 +2,9 @@
 
 /**
  *	The MIT License (MIT)
- *
+
+ *	Copyright (c) 2016 stefan2904
+  *	Copyright (c) 2016 LosFuzzys (https://hack.more.systems)
  *	Copyright (c) 2016 Kasper Rynning-Tønnesen
  *
  *	Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,7 +24,7 @@
  *	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *	SOFTWARE.
- *	
+ *
  */
 
 if(!defined('MEDIAWIKI')) {
@@ -31,16 +33,15 @@ if(!defined('MEDIAWIKI')) {
 
 
 if ( function_exists( 'wfLoadExtension' ) ) {
-	wfLoadExtension( 'OAuth2Dataporten' );
+	wfLoadExtension( 'OAuth2Github' );
 	// Keep i18n globals so mergeMessageFileList.php doesn't break
-	$wgOAuth2Dataporten['client']['id'] 			= getenv('DATAPORTEN_CLIENTID') ? getenv('DATAPORTEN_CLIENTID') : '';
-	$wgOAuth2Dataporten['client']['secret'] 		= getenv('DATAPORTEN_CLIENTSECRET') ? getenv('DATAPORTEN_CLIENTSECRET') : '';
-	$wgOAuth2Dataporten['config']['groups_array'] 	= getenv('DATAPORTEN_RIGHTS_ARRAY') ? json_decode(getenv('DATAPORTEN_RIGHTS_ARRAY'),true) : array();
-	$wgOAuth2Dataporten['config']['auth_endpoint']  = 'https://auth.dataporten.no/oauth/authorization';            // full url's
-	$wgOAuth2Dataporten['config']['token_endpoint'] = 'https://auth.dataporten.no/oauth/token';
-	$wgOAuth2Dataporten['config']['info_endpoint']  = 'https://auth.dataporten.no/userinfo';
-	$wgOAuth2Dataporten['config']['auth_type']      = 'Bearer';
-	$wgOAuth2Dataporten['config']['group_endpoint'] = 'https://groups-api.dataporten.no/groups/me/groups';
+	$wgOAuth2Github['client']['id'] 			= getenv('GITHUB_CLIENTID') ? getenv('GITHUB_CLIENTID') : '';
+	$wgOAuth2Github['client']['secret'] 		= getenv('GITHUB_CLIENTSECRET') ? getenv('GITHUB_CLIENTSECRET') : '';
+	$wgOAuth2Github['config']['auth_endpoint']  = 'https://github.com/login/oauth/authorize';            // full url's
+	$wgOAuth2Github['config']['token_endpoint'] = 'https://github.com/login/oauth/access_token';
+	$wgOAuth2Github['config']['info_endpoint']  = 'https://api.github.com/user';
+	$wgOAuth2Github['config']['auth_type']      = 'token';
+	$wgOAuth2Github['config']['required_org']   = NULL;
 	$wgGroupPermissions['group']['right'] 			= true /* or false */;
 	$wgGroupPermissions['oauth2'] 					= $wgGroupPermissions['user'];
 	# Disable for everyone.
@@ -49,16 +50,12 @@ if ( function_exists( 'wfLoadExtension' ) ) {
 	$wgGroupPermissions['user']['edit']           	= false;
 	# Make it so users with confirmed email addresses are in the group.
 	$wgAutopromote['emailconfirmed'] 				= APCOND_EMAILCONFIRMED;
-	# Hide group from user list. 
+	# Hide group from user list.
 	$wgImplicitGroups[] 							= 'emailconfirmed';
 	# Finally, set it to true for the desired group.
 	$wgGroupPermissions['emailconfirmed']['edit'] 	= true;
 
-	foreach($wgOAuth2Dataporten['config']['groups_array'] as $key => $value){
-		$wgGroupPermissions[$key] = $wgGroupPermissions[$value];
-	}
-
 	return;
 } else {
-	die( 'This version of the OAuth2Dataporten extension requires MediaWiki 1.25+' );
+	die( 'This version of the OAuth2Github extension requires MediaWiki 1.25+' );
 }
